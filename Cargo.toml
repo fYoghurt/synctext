@@ -1,0 +1,18 @@
+[package]
+name = "synctext"
+version = "0.1.5"
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
+
+[dependencies]
+tokio = { version = "1.42.0", features = ["full"]}
+tokio-tungstenite = "0.26.1"
+tungstenite = "0.26.1"
+warp = "0.3.7"
+futures-util = "0.3.31"
+local-ip-address = "0.6.3"
+webbrowser = "1.0.3"

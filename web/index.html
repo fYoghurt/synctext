@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync Text</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        textarea {
+            width: 97vw; /* 使用视口宽度的100% */
+            height: 97vh; /* 使用视口高度的100% */
+            box-sizing: border-box; /* 确保内边距和边框不会增加元素的总宽度和高度 */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="inputBox"></textarea>
+    <script>
+        let socket;
+        const connectWebSocket = () => {
+            socket = new WebSocket('ws://{{ip}}:6699');
+
+            socket.onopen = () => {
+                console.log('WebSocket connection established');
+            };
+
+            socket.onclose = (event) => {
+                console.log('WebSocket connection closed', event);
+                setTimeout(connectWebSocket, 5000); // 5秒后重试连接
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            socket.onmessage = (event) => {
+                document.getElementById('inputBox').value = event.data;
+            };
+        };
+
+        // 初始连接
+        connectWebSocket();
+
+        document.getElementById('inputBox').addEventListener('input', (event) => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(event.target.value);
+            }
+        });
+        // 监听 beforeunload 事件，确保在页面关闭前关闭 WebSocket 连接
+        window.addEventListener('beforeunload', (event) => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.close();
+                // 可选：给用户一个确认提示
+                event.returnValue = '您确定要离开此页面吗？';
+            }
+        });
+    </script>
+</body>
+</html>
